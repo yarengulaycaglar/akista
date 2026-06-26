@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Akışta" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Akışta</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" id="todayLabel">Bugün</p>
+        <h1>Akışta</h1>
+        <p class="muted top-sub">Günün karmaşasını sadeleştir. Aklındakileri yakala, sıradaki adımı gör, akışını kaybetme.</p>
+      </div>
+      <button class="icon-btn" id="settingsBtn" aria-label="Ayarlar">Ayarlar</button>
+    </header>
+
+    <main>
+      <section class="view active" id="todayView" aria-labelledby="todayTab">
+        <section class="hero-card">
+          <div class="hero-copy">
+            <p class="eyebrow">Akışını başlat</p>
+            <h2 id="nextTitle">Sıradaki adımı gör, akışını kaybetme.</h2>
+            <p class="muted" id="nextSubtitle">Akışta, günü küçük ve yapılabilir parçalara böler.</p>
+            <div class="quick-actions">
+              <button class="mini-action" id="startNextBtn">Odak başlat</button>
+              <button class="mini-action secondary" id="suggestNextBtn">Bana iş seç</button>
+            </div>
+          </div>
+          <div class="hero-side">
+            <div class="score-pill"><span id="doneCount">0</span>/<span id="todayCount">0</span></div>
+            <small>bugün tamamlandı</small>
+          </div>
+        </section>
+
+        <section class="capture-card">
+          <label for="quickCapture">Aklındakini hemen yakala</label>
+          <div class="capture-row">
+            <input id="quickCapture" type="text" placeholder="Örn: Mehmet’i ara, faturayı öde, ilacı al..." maxlength="90" />
+            <button id="quickCaptureBtn">Ekle</button>
+          </div>
+          <p class="muted">Düzenlemek sonra. Şimdi amaç zihni boşaltmak ve kaybolmadan devam etmek.</p>
+        </section>
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <span>Odak</span>
+            <strong id="focusCount">0</strong>
+            <p>İlk 3 iş</p>
+          </article>
+          <article class="stat-card">
+            <span>Randevu</span>
+            <strong id="appointmentCount">0</strong>
+            <p>Bugünkü plan</p>
+          </article>
+          <article class="stat-card">
+            <span>Sıradaki</span>
+            <strong id="nextTime">—</strong>
+            <p>En yakın saat</p>
+          </article>
+        </section>
+
+        <div class="section-title-row">
+          <h3>Bugünün 3 ana odağı</h3>
+          <button class="text-btn" id="focusHelpBtn">Neden 3?</button>
+        </div>
+        <div id="focusList" class="task-list empty-ready"></div>
+
+        <div class="section-title-row">
+          <h3>Günün akışı</h3>
+          <button class="text-btn" data-quick="appointment">Randevu ekle</button>
+        </div>
+        <div id="timelineList" class="timeline-list empty-ready"></div>
+
+        <div class="section-title-row">
+          <h3>Tamamlananlar</h3>
+          <button class="text-btn" id="hideDoneBtn">Gizle/göster</button>
+        </div>
+        <div id="doneToday" class="task-list empty-ready compact-done"></div>
+      </section>
+
+      <section class="view" id="weekView" aria-labelledby="weekTab">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">7 günlük görünüm</p>
+            <h2>Haftalık plan</h2>
+          </div>
+          <button class="text-btn" id="thisWeekBtn">Bugünden başla</button>
+        </div>
+        <div id="weekList" class="week-list"></div>
+      </section>
+
+      <section class="view" id="allView" aria-labelledby="allTab">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">Genel liste</p>
+            <h2>Açık işler</h2>
+          </div>
+          <button class="text-btn danger" id="clearDoneBtn">Bitenleri temizle</button>
+        </div>
+
+        <div class="filter-stack">
+          <input id="searchInput" class="search-input" type="search" placeholder="Başlık, ilk adım veya not içinde ara" />
+          <div class="filter-row">
+            <select id="filterCategory" aria-label="Kategori filtrele">
+              <option value="all">Tüm kategoriler</option>
+            </select>
+            <select id="filterPriority" aria-label="Öncelik filtrele">
+              <option value="all">Tüm öncelikler</option>
+              <option value="must">Bugün şart</option>
+              <option value="important">Önemli</option>
+              <option value="later">Sonra</option>
+            </select>
+          </div>
+        </div>
+        <div id="allTasks" class="task-list empty-ready"></div>
+      </section>
+
+      <section class="view" id="addView" aria-labelledby="addTab">
+        <div class="section-title-row no-wrap">
+          <div>
+            <p class="eyebrow">Yeni kayıt</p>
+            <h2>Görev / randevu ekle</h2>
+          </div>
+        </div>
+
+        <form id="taskForm" class="form-card">
+          <div class="pill-toggle" id="typeToggle" aria-label="Tip seç">
+            <button type="button" class="toggle-btn active" data-type="task">Görev</button>
+            <button type="button" class="toggle-btn" data-type="appointment">Randevu</button>
+          </div>
+          <input id="type" type="hidden" value="task" />
+
+          <label>
+            Başlık
+            <input id="title" type="text" placeholder="Örn: Doktoru ara / Sunumu bitir" required maxlength="80" />
+          </label>
+
+          <label>
+            İlk küçük adım
+            <input id="firstStep" type="text" placeholder="Örn: Telefonu elime al, dosyayı aç, adrese bak..." maxlength="100" />
+          </label>
+
+          <div class="two-col">
+            <label>
+              Tarih
+              <input id="date" type="date" required />
+            </label>
+            <label>
+              Saat
+              <input id="time" type="time" />
+            </label>
+          </div>
+
+          <div class="two-col">
+            <label>
+              Süre
+              <select id="duration">
+                <option value="5">5 dk başlama</option>
+                <option value="15">15 dk</option>
+                <option value="25" selected>25 dk odak</option>
+                <option value="45">45 dk</option>
+                <option value="60">60 dk</option>
+              </select>
+            </label>
+            <label>
+              Enerji
+              <select id="energy">
+                <option value="low">Düşük enerji</option>
+                <option value="medium" selected>Normal enerji</option>
+                <option value="high">Yüksek enerji</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="two-col">
+            <label>
+              Kategori
+              <select id="category"></select>
+            </label>
+            <label>
+              Öncelik
+              <select id="priority">
+                <option value="must">Bugün şart</option>
+                <option value="important" selected>Önemli</option>
+                <option value="later">Sonra</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Not
+            <textarea id="notes" rows="4" placeholder="Adres, telefon, hatırlatıcı not, yapılacak detaylar..."></textarea>
+          </label>
+
+          <div class="section-inline-label">Hazır şablonlar</div>
+          <div class="template-row">
+            <button type="button" class="chip" data-template="Güne başla">Güne başla</button>
+            <button type="button" class="chip" data-template="Telefon aç">Telefon aç</button>
+            <button type="button" class="chip" data-template="Toplantı">Toplantı</button>
+            <button type="button" class="chip" data-template="Evrak işi">Evrak işi</button>
+            <button type="button" class="chip" data-template="Ev işi">Ev işi</button>
+            <button type="button" class="chip" data-template="Fatura öde">Fatura öde</button>
+          </div>
+
+          <button class="primary-btn" type="submit">Kaydet</button>
+        </form>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Ana menü">
+      <button class="nav-btn active" id="todayTab" data-view="todayView"><span>Bugün</span></button>
+      <button class="nav-btn" id="weekTab" data-view="weekView"><span>Hafta</span></button>
+      <button class="nav-btn" id="allTab" data-view="allView"><span>Liste</span></button>
+      <button class="nav-btn add" id="addTab" data-view="addView"><span>Ekle</span></button>
+    </nav>
+  </div>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="dialog-card">
+      <h2>Ayarlar</h2>
+      <p class="muted">Veriler bu cihazın tarayıcı hafızasında saklanır. Telefon değişirse yedekleme için dışa aktarma kullan.</p>
+      <button type="button" class="secondary-btn" id="enableNotificationsBtn">Bildirim izni iste</button>
+      <button type="button" class="secondary-btn" id="exportBtn">Verileri dışa aktar</button>
+      <label class="import-label secondary-btn">
+        Verileri içe aktar
+        <input type="file" id="importFile" accept="application/json" hidden />
+      </label>
+      <button type="button" class="danger-btn" id="resetBtn">Tüm verileri sil</button>
+      <button class="primary-btn">Kapat</button>
+    </form>
+  </dialog>
+
+  <dialog id="detailDialog">
+    <form method="dialog" class="dialog-card" id="detailForm">
+      <h2 id="detailTitle">Detay</h2>
+      <p id="detailMeta" class="muted"></p>
+      <div id="detailFirstStep" class="first-step-box"></div>
+      <p id="detailNotes"></p>
+      <div class="dialog-actions">
+        <button type="button" class="primary-btn" id="focusBtn">Odak modu başlat</button>
+        <button type="button" class="secondary-btn" id="fiveMinuteBtn">5 dk başlama</button>
+        <button type="button" class="secondary-btn" id="calendarBtn">Takvime ekle</button>
+        <button type="button" class="secondary-btn" id="snoozeBtn">30 dk ertele</button>
+        <button type="button" class="secondary-btn" id="tomorrowBtn">Yarına at</button>
+        <button type="button" class="secondary-btn" id="nextWeekBtn">Haftaya at</button>
+        <button type="button" class="danger-btn" id="deleteBtn">Sil</button>
+        <button class="secondary-btn">Kapat</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="timerDialog">
+    <form method="dialog" class="dialog-card timer-card" id="timerForm">
+      <p class="eyebrow">Odak modu</p>
+      <h2 id="timerTaskTitle">Görev</h2>
+      <p class="muted" id="timerStep">İlk küçük adımı yap.</p>
+      <div class="timer-circle">
+        <span id="timerMinutes">25:00</span>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="primary-btn" id="timerStartPauseBtn">Başlat</button>
+        <button type="button" class="secondary-btn" id="timerDoneBtn">Tamamlandı işaretle</button>
+        <button type="button" class="secondary-btn" id="timerResetBtn">Sıfırla</button>
+        <button class="danger-btn">Kapat</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
