@@ -88,6 +88,48 @@
         <div id="doneToday" class="task-list empty-ready compact-done"></div>
       </section>
 
+
+      <section class="view" id="calendarView" aria-labelledby="calendarTab">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">Aylık görünüm</p>
+            <h2>Takvim</h2>
+          </div>
+          <button class="text-btn" id="calendarTodayBtn">Bugüne dön</button>
+        </div>
+
+        <section class="calendar-card">
+          <div class="calendar-toolbar">
+            <button type="button" class="calendar-nav-btn" id="prevMonthBtn" aria-label="Önceki ay">‹</button>
+            <div>
+              <strong id="calendarMonthLabel">Ay</strong>
+              <input id="calendarMonthPicker" type="month" aria-label="Ay seç" />
+            </div>
+            <button type="button" class="calendar-nav-btn" id="nextMonthBtn" aria-label="Sonraki ay">›</button>
+          </div>
+
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </section>
+
+        <section class="selected-day-card">
+          <div class="section-title-row compact">
+            <div>
+              <p class="eyebrow">Seçili gün</p>
+              <h3 id="selectedDayTitle">Bugün</h3>
+            </div>
+            <div class="selected-day-actions">
+              <button class="text-btn" id="addTaskForSelectedDate">Görev ekle</button>
+              <button class="text-btn" id="addAppointmentForSelectedDate">Randevu ekle</button>
+            </div>
+          </div>
+          <div id="selectedDayHolidays" class="holiday-list"></div>
+          <div id="selectedDayTasks" class="task-list empty-ready"></div>
+        </section>
+      </section>
+
       <section class="view" id="weekView" aria-labelledby="weekTab">
         <div class="section-title-row">
           <div>
@@ -219,6 +261,7 @@
 
     <nav class="bottom-nav" aria-label="Ana menü">
       <button class="nav-btn active" id="todayTab" data-view="todayView"><span>Bugün</span></button>
+      <button class="nav-btn" id="calendarTab" data-view="calendarView"><span>Takvim</span></button>
       <button class="nav-btn" id="weekTab" data-view="weekView"><span>Hafta</span></button>
       <button class="nav-btn" id="allTab" data-view="allView"><span>Liste</span></button>
       <button class="nav-btn add" id="addTab" data-view="addView"><span>Ekle</span></button>

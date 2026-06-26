@@ -1,7 +1,7 @@
 {
   "name": "Akışta",
   "short_name": "Akışta",
-  "description": "ADHD dostu günlük akış uygulaması. Aklındakileri hızlıca yakala, en önemli 3 odağı gör, küçük adımlarla güne devam et.",
+  "description": "ADHD dostu günlük akış ve takvim uygulaması. Aklındakileri yakala, haftanı planla, geçmiş ve gelecek günleri takvimde kontrol et.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#f8fafc",

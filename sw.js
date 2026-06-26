@@ -1,4 +1,4 @@
-const CACHE_NAME = "akista-cache-v1";
+const CACHE_NAME = "akista-cache-v2-calendar";
 const ASSETS = [
   "./",
   "index.html",

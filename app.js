@@ -32,6 +32,8 @@ const state = {
   tasks: loadTasks(),
   selectedTaskId: null,
   currentView: "todayView",
+  calendarMonth: todayISO().slice(0, 7),
+  selectedDate: todayISO(),
   suggestedTaskId: null,
   timer: {
     taskId: null,
@@ -260,6 +262,235 @@ function renderToday() {
   renderList($("#doneToday"), done, "Henüz tamamlanan iş yok. Küçük bir adımla başla.");
 }
 
+
+function monthLabel(monthISOValue) {
+  return new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(new Date(`${monthISOValue}-01T12:00:00`));
+}
+
+function addMonths(monthISOValue, offset) {
+  const d = new Date(`${monthISOValue}-01T12:00:00`);
+  d.setMonth(d.getMonth() + offset);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 7);
+}
+
+function startOfCalendarGrid(monthISOValue) {
+  const first = new Date(`${monthISOValue}-01T12:00:00`);
+  const day = first.getDay(); // 0 Sunday, 1 Monday
+  const mondayBased = (day + 6) % 7;
+  first.setDate(first.getDate() - mondayBased);
+  first.setMinutes(first.getMinutes() - first.getTimezoneOffset());
+  return first.toISOString().slice(0, 10);
+}
+
+function nthWeekdayOfMonth(year, monthIndex, weekday, nth) {
+  const d = new Date(year, monthIndex, 1, 12);
+  const add = (weekday - d.getDay() + 7) % 7;
+  d.setDate(1 + add + (nth - 1) * 7);
+  return d.toISOString().slice(0, 10);
+}
+
+function holiday(date, name, type = "resmi", note = "") {
+  return { date, name, type, note };
+}
+
+function fixedHoliday(date, name, type = "resmi", note = "") {
+  return { date, name, type, note };
+}
+
+const RELIGIOUS_HOLIDAYS = [
+  holiday("2024-04-09", "Ramazan Bayramı Arifesi", "resmi", "yarım gün"),
+  holiday("2024-04-10", "Ramazan Bayramı 1. gün"),
+  holiday("2024-04-11", "Ramazan Bayramı 2. gün"),
+  holiday("2024-04-12", "Ramazan Bayramı 3. gün"),
+  holiday("2024-06-15", "Kurban Bayramı Arifesi", "resmi", "yarım gün"),
+  holiday("2024-06-16", "Kurban Bayramı 1. gün"),
+  holiday("2024-06-17", "Kurban Bayramı 2. gün"),
+  holiday("2024-06-18", "Kurban Bayramı 3. gün"),
+  holiday("2024-06-19", "Kurban Bayramı 4. gün"),
+
+  holiday("2025-03-29", "Ramazan Bayramı Arifesi", "resmi", "yarım gün"),
+  holiday("2025-03-30", "Ramazan Bayramı 1. gün"),
+  holiday("2025-03-31", "Ramazan Bayramı 2. gün"),
+  holiday("2025-04-01", "Ramazan Bayramı 3. gün"),
+  holiday("2025-06-05", "Kurban Bayramı Arifesi", "resmi", "yarım gün"),
+  holiday("2025-06-06", "Kurban Bayramı 1. gün"),
+  holiday("2025-06-07", "Kurban Bayramı 2. gün"),
+  holiday("2025-06-08", "Kurban Bayramı 3. gün"),
+  holiday("2025-06-09", "Kurban Bayramı 4. gün"),
+
+  holiday("2026-03-19", "Ramazan Bayramı Arifesi", "resmi", "yarım gün"),
+  holiday("2026-03-20", "Ramazan Bayramı 1. gün"),
+  holiday("2026-03-21", "Ramazan Bayramı 2. gün"),
+  holiday("2026-03-22", "Ramazan Bayramı 3. gün"),
+  holiday("2026-05-26", "Kurban Bayramı Arifesi", "resmi", "yarım gün"),
+  holiday("2026-05-27", "Kurban Bayramı 1. gün"),
+  holiday("2026-05-28", "Kurban Bayramı 2. gün"),
+  holiday("2026-05-29", "Kurban Bayramı 3. gün"),
+  holiday("2026-05-30", "Kurban Bayramı 4. gün"),
+
+  holiday("2027-03-09", "Ramazan Bayramı Arifesi", "resmi", "tahmini / yarım gün"),
+  holiday("2027-03-10", "Ramazan Bayramı 1. gün", "resmi", "tahmini"),
+  holiday("2027-03-11", "Ramazan Bayramı 2. gün", "resmi", "tahmini"),
+  holiday("2027-03-12", "Ramazan Bayramı 3. gün", "resmi", "tahmini"),
+  holiday("2027-05-15", "Kurban Bayramı Arifesi", "resmi", "tahmini / yarım gün"),
+  holiday("2027-05-16", "Kurban Bayramı 1. gün", "resmi", "tahmini"),
+  holiday("2027-05-17", "Kurban Bayramı 2. gün", "resmi", "tahmini"),
+  holiday("2027-05-18", "Kurban Bayramı 3. gün", "resmi", "tahmini"),
+  holiday("2027-05-19", "Kurban Bayramı 4. gün", "resmi", "tahmini"),
+
+  holiday("2028-02-26", "Ramazan Bayramı Arifesi", "resmi", "tahmini / yarım gün"),
+  holiday("2028-02-27", "Ramazan Bayramı 1. gün", "resmi", "tahmini"),
+  holiday("2028-02-28", "Ramazan Bayramı 2. gün", "resmi", "tahmini"),
+  holiday("2028-02-29", "Ramazan Bayramı 3. gün", "resmi", "tahmini"),
+  holiday("2028-05-04", "Kurban Bayramı Arifesi", "resmi", "tahmini / yarım gün"),
+  holiday("2028-05-05", "Kurban Bayramı 1. gün", "resmi", "tahmini"),
+  holiday("2028-05-06", "Kurban Bayramı 2. gün", "resmi", "tahmini"),
+  holiday("2028-05-07", "Kurban Bayramı 3. gün", "resmi", "tahmini"),
+  holiday("2028-05-08", "Kurban Bayramı 4. gün", "resmi", "tahmini"),
+
+  holiday("2029-02-14", "Ramazan Bayramı Arifesi", "resmi", "tahmini / yarım gün"),
+  holiday("2029-02-15", "Ramazan Bayramı 1. gün", "resmi", "tahmini"),
+  holiday("2029-02-16", "Ramazan Bayramı 2. gün", "resmi", "tahmini"),
+  holiday("2029-02-17", "Ramazan Bayramı 3. gün", "resmi", "tahmini"),
+  holiday("2029-04-23", "Kurban Bayramı Arifesi", "resmi", "tahmini / yarım gün"),
+  holiday("2029-04-24", "Kurban Bayramı 1. gün", "resmi", "tahmini"),
+  holiday("2029-04-25", "Kurban Bayramı 2. gün", "resmi", "tahmini"),
+  holiday("2029-04-26", "Kurban Bayramı 3. gün", "resmi", "tahmini"),
+  holiday("2029-04-27", "Kurban Bayramı 4. gün", "resmi", "tahmini"),
+
+  holiday("2030-02-03", "Ramazan Bayramı Arifesi", "resmi", "tahmini / yarım gün"),
+  holiday("2030-02-04", "Ramazan Bayramı 1. gün", "resmi", "tahmini"),
+  holiday("2030-02-05", "Ramazan Bayramı 2. gün", "resmi", "tahmini"),
+  holiday("2030-02-06", "Ramazan Bayramı 3. gün", "resmi", "tahmini"),
+  holiday("2030-04-12", "Kurban Bayramı Arifesi", "resmi", "tahmini / yarım gün"),
+  holiday("2030-04-13", "Kurban Bayramı 1. gün", "resmi", "tahmini"),
+  holiday("2030-04-14", "Kurban Bayramı 2. gün", "resmi", "tahmini"),
+  holiday("2030-04-15", "Kurban Bayramı 3. gün", "resmi", "tahmini"),
+  holiday("2030-04-16", "Kurban Bayramı 4. gün", "resmi", "tahmini")
+];
+
+function getHolidaysForDate(iso) {
+  const year = Number(iso.slice(0, 4));
+  const monthDay = iso.slice(5);
+  const fixed = [
+    fixedHoliday(`${year}-01-01`, "Yılbaşı"),
+    fixedHoliday(`${year}-04-23`, "Ulusal Egemenlik ve Çocuk Bayramı"),
+    fixedHoliday(`${year}-05-01`, "Emek ve Dayanışma Günü"),
+    fixedHoliday(`${year}-05-19`, "Atatürk'ü Anma, Gençlik ve Spor Bayramı"),
+    fixedHoliday(`${year}-07-15`, "Demokrasi ve Millî Birlik Günü"),
+    fixedHoliday(`${year}-08-30`, "Zafer Bayramı"),
+    fixedHoliday(`${year}-10-28`, "Cumhuriyet Bayramı Arifesi", "resmi", "yarım gün"),
+    fixedHoliday(`${year}-10-29`, "Cumhuriyet Bayramı"),
+    fixedHoliday(`${year}-11-10`, "Atatürk'ü Anma Günü", "özel"),
+    fixedHoliday(`${year}-11-24`, "Öğretmenler Günü", "özel"),
+    fixedHoliday(`${year}-12-31`, "Yılbaşı Gecesi", "özel")
+  ].filter(h => h.date === iso);
+
+  const movingSpecial = [
+    fixedHoliday(nthWeekdayOfMonth(year, 4, 0, 2), "Anneler Günü", "özel"),
+    fixedHoliday(nthWeekdayOfMonth(year, 5, 0, 3), "Babalar Günü", "özel")
+  ].filter(h => h.date === iso);
+
+  const religious = RELIGIOUS_HOLIDAYS.filter(h => h.date === iso);
+  return [...fixed, ...movingSpecial, ...religious];
+}
+
+function setCalendarMonth(monthISOValue) {
+  state.calendarMonth = monthISOValue;
+  renderCalendar();
+}
+
+function setSelectedDate(iso) {
+  state.selectedDate = iso;
+  state.calendarMonth = iso.slice(0, 7);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = $("#calendarGrid");
+  if (!grid) return;
+
+  $("#calendarMonthLabel").textContent = monthLabel(state.calendarMonth);
+  $("#calendarMonthPicker").value = state.calendarMonth;
+
+  grid.innerHTML = "";
+  const start = startOfCalendarGrid(state.calendarMonth);
+  const today = todayISO();
+
+  for (let i = 0; i < 42; i++) {
+    const iso = addDaysISO(start, i);
+    const tasks = state.tasks.filter(t => t.date === iso);
+    const openTasks = tasks.filter(t => !t.done);
+    const holidays = getHolidaysForDate(iso);
+    const day = document.createElement("button");
+    day.type = "button";
+    day.className = [
+      "calendar-day",
+      iso.slice(0, 7) !== state.calendarMonth ? "outside" : "",
+      iso === today ? "today" : "",
+      iso === state.selectedDate ? "selected" : ""
+    ].filter(Boolean).join(" ");
+    day.innerHTML = `
+      <span class="calendar-day-number">${Number(iso.slice(8))}</span>
+      <span class="calendar-day-meta"></span>
+    `;
+
+    const meta = day.querySelector(".calendar-day-meta");
+    if (openTasks.length) {
+      const dot = document.createElement("span");
+      dot.className = "calendar-dot";
+      dot.textContent = `${openTasks.length} iş`;
+      meta.appendChild(dot);
+    }
+    if (tasks.some(t => t.type === "appointment" && !t.done)) {
+      const dot = document.createElement("span");
+      dot.className = "calendar-dot";
+      dot.textContent = "randevu";
+      meta.appendChild(dot);
+    }
+    if (holidays.length) {
+      const h = document.createElement("span");
+      h.className = "holiday-mini";
+      h.textContent = holidays[0].name;
+      meta.appendChild(h);
+    }
+
+    day.addEventListener("click", () => setSelectedDate(iso));
+    grid.appendChild(day);
+  }
+
+  renderSelectedDay();
+}
+
+function renderSelectedDay() {
+  const title = $("#selectedDayTitle");
+  if (!title) return;
+
+  const iso = state.selectedDate;
+  title.textContent = formatDate(iso);
+
+  const holidayBox = $("#selectedDayHolidays");
+  holidayBox.innerHTML = "";
+  const holidays = getHolidaysForDate(iso);
+  holidays.forEach(h => {
+    const pill = document.createElement("div");
+    pill.className = `holiday-pill ${h.type === "özel" ? "special" : ""}`;
+    pill.innerHTML = `<span>${h.name}${h.note ? ` • ${h.note}` : ""}</span><small>${h.type === "özel" ? "özel gün" : "resmi"}</small>`;
+    holidayBox.appendChild(pill);
+  });
+
+  const selectedTasks = state.tasks.filter(t => t.date === iso);
+  renderList($("#selectedDayTasks"), selectedTasks, "Bu gün için kayıt yok. Takvimden geçmiş veya gelecek günleri kontrol edebilirsin.");
+}
+
+function addForSelectedDate(type) {
+  showView("addView");
+  syncTypeToggle(type);
+  $("#date").value = state.selectedDate;
+  if (type === "appointment") $("#category").value = "Randevu";
+}
+
 function renderWeek() {
   const start = todayISO();
   const weekList = $("#weekList");
@@ -301,6 +532,7 @@ function renderAll() {
 
 function render() {
   renderToday();
+  renderCalendar();
   renderWeek();
   renderAll();
 }
@@ -546,6 +778,12 @@ function setupButtons() {
   $("#settingsBtn").addEventListener("click", () => $("#settingsDialog").showModal());
   $("#focusHelpBtn").addEventListener("click", () => toast("3 ana odak listeyi küçültür. Önce bugün tarihli, açık ve yüksek öncelikli işler seçilir."));
   $("#thisWeekBtn").addEventListener("click", () => renderWeek());
+  $("#prevMonthBtn").addEventListener("click", () => setCalendarMonth(addMonths(state.calendarMonth, -1)));
+  $("#nextMonthBtn").addEventListener("click", () => setCalendarMonth(addMonths(state.calendarMonth, 1)));
+  $("#calendarTodayBtn").addEventListener("click", () => setSelectedDate(todayISO()));
+  $("#calendarMonthPicker").addEventListener("change", (e) => setCalendarMonth(e.target.value || todayISO().slice(0, 7)));
+  $("#addTaskForSelectedDate").addEventListener("click", () => addForSelectedDate("task"));
+  $("#addAppointmentForSelectedDate").addEventListener("click", () => addForSelectedDate("appointment"));
   $("#tomorrowBtn").addEventListener("click", () => moveSelected(1));
   $("#nextWeekBtn").addEventListener("click", () => moveSelected(7));
   $("#snoozeBtn").addEventListener("click", snoozeSelected);
