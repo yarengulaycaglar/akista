@@ -24,16 +24,6 @@ Akışta, zihninde dönen görevleri sade bir günlük akışa dönüştürür. 
 - Tamamlananları görünür kılan sade başarı alanı
 - Offline çalışabilen PWA altyapısı
 
-## GitHub Pages yayını
-
-Bu klasörün içindeki dosyaları repo ana dizinine yükleyin.
-
-`Settings > Pages` bölümünden:
-
-- Source: Deploy from a branch
-- Branch: main
-- Folder: / root
-
-Repo adı `akista` ise yayın linki genelde:
+yayın linki:
 
 `https://kullaniciadi.github.io/akista/`
