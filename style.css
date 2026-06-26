@@ -915,3 +915,80 @@ body.hide-done .compact-done { display: none; }
     min-height: 72px;
   }
 }
+
+
+/* v3: Takvim kaymasını engelleyen kesin grid düzeltmesi */
+.calendar-card {
+  overflow: hidden;
+}
+
+.calendar-grid,
+.calendar-weekdays {
+  width: 100%;
+  max-width: 100%;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+}
+
+.calendar-weekdays span,
+.calendar-day,
+.calendar-day * {
+  min-width: 0;
+}
+
+.calendar-day {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.calendar-day-meta {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.calendar-dot,
+.holiday-mini,
+.holiday-mini.special {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mobilde uzun gün etiketleri yerine kısa ve düzgün görünüm */
+@media (max-width: 520px) {
+  .calendar-card {
+    padding: 12px;
+  }
+
+  .calendar-weekdays {
+    gap: 4px;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+
+  .calendar-day {
+    min-height: 64px;
+    padding: 6px 4px;
+    border-radius: 12px;
+  }
+
+  .calendar-day-number {
+    font-size: 13px;
+  }
+
+  .calendar-day-meta {
+    gap: 3px;
+  }
+
+  .calendar-dot,
+  .holiday-mini {
+    min-height: 16px;
+    padding: 1px 4px;
+    font-size: 9px;
+    line-height: 1.2;
+  }
+}
