@@ -425,11 +425,15 @@ function renderCalendar() {
     const holidays = getHolidaysForDate(iso);
     const day = document.createElement("button");
     day.type = "button";
+    const hasOfficialHoliday = holidays.some(h => h.type !== "özel");
+    const hasSpecialDay = holidays.some(h => h.type === "özel");
     day.className = [
       "calendar-day",
       iso.slice(0, 7) !== state.calendarMonth ? "outside" : "",
       iso === today ? "today" : "",
-      iso === state.selectedDate ? "selected" : ""
+      iso === state.selectedDate ? "selected" : "",
+      hasOfficialHoliday ? "has-official-holiday" : "",
+      hasSpecialDay && !hasOfficialHoliday ? "has-special-day" : ""
     ].filter(Boolean).join(" ");
     day.innerHTML = `
       <span class="calendar-day-number">${Number(iso.slice(8))}</span>
@@ -450,9 +454,11 @@ function renderCalendar() {
       meta.appendChild(dot);
     }
     if (holidays.length) {
+      const official = holidays.find(h => h.type !== "özel");
+      const firstHoliday = official || holidays[0];
       const h = document.createElement("span");
-      h.className = "holiday-mini";
-      h.textContent = holidays[0].name;
+      h.className = `holiday-mini ${firstHoliday.type === "özel" ? "special" : ""}`;
+      h.textContent = firstHoliday.type === "özel" ? firstHoliday.name : firstHoliday.name.replace(" Bayramı", "");
       meta.appendChild(h);
     }
 
@@ -488,6 +494,7 @@ function addForSelectedDate(type) {
   showView("addView");
   syncTypeToggle(type);
   $("#date").value = state.selectedDate;
+  updateDateNotice();
   if (type === "appointment") $("#category").value = "Randevu";
 }
 
@@ -662,6 +669,28 @@ function syncTypeToggle(type) {
   }
 }
 
+
+function updateDateNotice() {
+  const notice = $("#dateNotice");
+  const dateInput = $("#date");
+  if (!notice || !dateInput) return;
+
+  const holidays = getHolidaysForDate(dateInput.value);
+  if (!holidays.length) {
+    notice.className = "date-notice";
+    notice.textContent = "";
+    return;
+  }
+
+  const official = holidays.some(h => h.type !== "özel");
+  const text = holidays.map(h => `${h.name}${h.note ? ` (${h.note})` : ""}`).join(" • ");
+  notice.className = `date-notice show ${official ? "" : "special"}`.trim();
+  notice.textContent = official
+    ? `Bu tarihte resmi tatil/özel gün var: ${text}. Planı buna göre ayarlayabilirsin.`
+    : `Bu tarihte özel gün var: ${text}. Planı buna göre ayarlayabilirsin.`;
+}
+
+
 function setupForm() {
   const categorySelect = $("#category");
   const filterCategory = $("#filterCategory");
@@ -671,6 +700,8 @@ function setupForm() {
   });
   $("#date").value = todayISO();
   $("#category").value = categories[0];
+  updateDateNotice();
+  $("#date").addEventListener("change", updateDateNotice);
 
   $$(".toggle-btn").forEach(btn => btn.addEventListener("click", () => syncTypeToggle(btn.dataset.type)));
 
@@ -701,6 +732,7 @@ function setupForm() {
     $("#priority").value = "important";
     $("#duration").value = "25";
     $("#energy").value = "medium";
+    updateDateNotice();
     syncTypeToggle("task");
     render();
     showView("todayView");
@@ -959,14 +991,8 @@ function registerServiceWorker() {
 }
 
 function seedDemoIfEmpty() {
-  if (state.tasks.length) return;
-  const today = todayISO();
-  state.tasks = [
-    { id: "demo-1", type: "task", title: "Bugünün 3 ana odağını seç", firstStep: "Sadece 3 iş seç", date: today, time: "09:30", duration: "15", energy: "low", category: "Kişisel", priority: "must", notes: "Tüm listeye değil, sadece ilk üçe bak.", done: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: "demo-2", type: "appointment", title: "Örnek randevu", firstStep: "Adres ve çıkış saatini kontrol et", date: today, time: "14:00", duration: "45", energy: "medium", category: "Randevu", priority: "important", notes: "Bu örneği silebilirsin. Takvime ekle butonunu deneyebilirsin.", done: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: "demo-3", type: "task", title: "Fatura öde", firstStep: "Banka uygulamasını aç", date: today, time: "18:00", duration: "10", energy: "low", category: "Ödeme", priority: "later", notes: "Son ödeme gününü kontrol et.", done: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-  ].map(normalizeTask);
-  saveTasks();
+  // İlk açılışta örnek görev eklemiyoruz. Kullanıcı boş ve temiz bir uygulamayla başlar.
+  return;
 }
 
 function boot() {

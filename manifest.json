@@ -4,8 +4,8 @@
   "description": "ADHD dostu günlük akış ve takvim uygulaması. Aklındakileri yakala, haftanı planla, geçmiş ve gelecek günleri takvimde kontrol et.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#0f172a",
+  "background_color": "#f6f3ee",
+  "theme_color": "#233142",
   "lang": "tr-TR",
   "icons": [
     {

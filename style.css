@@ -1,19 +1,23 @@
 :root {
-  --bg: #f8fafc;
-  --surface: #ffffff;
-  --surface-soft: #f1f5f9;
-  --ink: #0f172a;
-  --muted: #64748b;
-  --line: #e2e8f0;
-  --accent: #0f172a;
-  --accent-2: #1e3a8a;
-  --accent-3: #2563eb;
-  --accent-soft: #eff6ff;
-  --danger: #dc2626;
-  --success: #059669;
-  --warning: #b45309;
-  --shadow: 0 16px 36px rgba(15, 23, 42, .08);
-  --shadow-soft: 0 8px 18px rgba(15, 23, 42, .055);
+  --bg: #f6f3ee;
+  --surface: #fffdf8;
+  --surface-soft: #eee9df;
+  --ink: #1f2933;
+  --muted: #6b7280;
+  --line: #e4ded2;
+  --accent: #233142;
+  --accent-2: #3b6b6b;
+  --accent-3: #c7773d;
+  --accent-soft: #eaf3f1;
+  --danger: #b42318;
+  --success: #157f5c;
+  --warning: #a15c22;
+  --holiday-official: #b42318;
+  --holiday-special: #7c5b2e;
+  --holiday-bg: #fff1e6;
+  --special-bg: #f5efe4;
+  --shadow: 0 16px 36px rgba(35, 49, 66, .09);
+  --shadow-soft: 0 8px 18px rgba(35, 49, 66, .06);
   --radius: 22px;
   --radius-sm: 14px;
 }
@@ -26,8 +30,9 @@ body {
   color: var(--ink);
   font: 15.5px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, Arial, sans-serif;
   background:
-    radial-gradient(circle at top right, rgba(30, 58, 138, .08), transparent 28%),
-    linear-gradient(180deg, #ffffff 0%, var(--bg) 42%, #eef2f7 100%);
+    radial-gradient(circle at top right, rgba(59, 107, 107, .12), transparent 30%),
+    radial-gradient(circle at top left, rgba(199, 119, 61, .09), transparent 26%),
+    linear-gradient(180deg, #fffdf8 0%, var(--bg) 46%, #ede8df 100%);
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
 }
@@ -43,8 +48,8 @@ input, select, textarea {
   color: var(--ink);
 }
 input:focus, select:focus, textarea:focus {
-  outline: 3px solid rgba(37, 99, 235, .12);
-  border-color: rgba(37, 99, 235, .55);
+  outline: 3px solid rgba(59, 107, 107, .16);
+  border-color: rgba(59, 107, 107, .58);
 }
 textarea { resize: vertical; }
 
@@ -175,7 +180,7 @@ h3 {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
   font-size: 23px;
   font-weight: 850;
-  box-shadow: 0 16px 30px rgba(15, 23, 42, .18);
+  box-shadow: 0 16px 30px rgba(35, 49, 66, .18);
 }
 
 .capture-card {
@@ -284,8 +289,8 @@ h3 {
 }
 
 .task-card.suggested {
-  outline: 3px solid rgba(37, 99, 235, .16);
-  border-color: rgba(37, 99, 235, .38);
+  outline: 3px solid rgba(59, 107, 107, .18);
+  border-color: rgba(59, 107, 107, .42);
 }
 
 .task-card.done { opacity: .62; }
@@ -486,7 +491,7 @@ h3 {
 .primary-btn {
   color: #fff;
   background: var(--accent);
-  box-shadow: 0 12px 22px rgba(15, 23, 42, .16);
+  box-shadow: 0 12px 22px rgba(35, 49, 66, .16);
 }
 
 .secondary-btn {
@@ -547,7 +552,7 @@ dialog {
   background: transparent;
 }
 
-dialog::backdrop { background: rgba(15, 23, 42, .38); }
+dialog::backdrop { background: rgba(35, 49, 66, .38); }
 
 .bottom-nav {
   position: fixed;
@@ -592,7 +597,7 @@ dialog::backdrop { background: rgba(15, 23, 42, .38); }
   max-width: calc(100% - 40px);
   padding: 12px 16px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, .94);
+  background: rgba(35, 49, 66, .94);
   color: #fff;
   text-align: center;
   opacity: 0;
@@ -710,7 +715,7 @@ body.hide-done .compact-done { display: none; }
 }
 
 .calendar-day.today {
-  border-color: rgba(37, 99, 235, .55);
+  border-color: rgba(59, 107, 107, .58);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
 }
 
@@ -818,12 +823,95 @@ body.hide-done .compact-done { display: none; }
     font-size: 13px;
   }
 
-  .holiday-mini {
-    display: none;
-  }
-
   .calendar-dot {
     font-size: 10px;
     padding: 1px 5px;
+  }
+}
+
+
+.calendar-day.has-official-holiday {
+  background: linear-gradient(180deg, var(--holiday-bg) 0%, #fffdf8 100%);
+  border-color: #fed7aa;
+}
+
+.calendar-day.has-special-day {
+  background: linear-gradient(180deg, var(--special-bg) 0%, #fffdf8 100%);
+  border-color: #e7d8bf;
+}
+
+.calendar-day.has-official-holiday .calendar-day-number {
+  color: var(--holiday-official);
+}
+
+.calendar-day.has-special-day .calendar-day-number {
+  color: var(--holiday-special);
+}
+
+.calendar-day.selected.has-official-holiday,
+.calendar-day.selected.has-special-day,
+.calendar-day.selected {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #fff;
+}
+
+.holiday-mini {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 18px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--holiday-bg);
+  color: var(--holiday-official);
+  font-size: 10.5px;
+  font-weight: 780;
+}
+
+.holiday-mini.special {
+  background: var(--special-bg);
+  color: var(--holiday-special);
+}
+
+.calendar-day.selected .holiday-mini,
+.calendar-day.selected .holiday-mini.special {
+  background: rgba(255,255,255,.18);
+  color: #fff;
+}
+
+.date-notice {
+  display: none;
+  margin: -4px 0 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--holiday-bg);
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 13px;
+  font-weight: 720;
+}
+
+.date-notice.show {
+  display: block;
+}
+
+.date-notice.special {
+  background: var(--special-bg);
+  border-color: #e7d8bf;
+  color: var(--holiday-special);
+}
+
+@media (max-width: 520px) {
+  .holiday-mini {
+    display: inline-flex;
+    max-width: 100%;
+    font-size: 9.5px;
+    padding: 1px 5px;
+  }
+
+  .calendar-day.has-official-holiday,
+  .calendar-day.has-special-day {
+    min-height: 72px;
   }
 }
